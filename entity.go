@@ -1,7 +1,3 @@
-// OpenRDAP
-// Copyright 2017 Tom Harwood
-// MIT License, see the LICENSE file.
-
 package openrdap
 
 import (
@@ -12,6 +8,7 @@ import (
 // Entity represents information of an organisation or person.
 //
 // Entity is a topmost RDAP response object.
+// https://datatracker.ietf.org/doc/html/rfc7483#section-5.1
 type Entity struct {
 	Common
 	Conformance     []string `json:"rdapConformance"`

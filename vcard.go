@@ -1,7 +1,3 @@
-// OpenRDAP
-// Copyright 2017 Tom Harwood
-// MIT License, see the LICENSE file.
-
 package openrdap
 
 import "fmt"
@@ -70,14 +66,16 @@ func parseJCard(jcardData []interface{}) (VCard, error) {
 
 		// Parse the jCard field based on the property type (first element)
 		propertyName := propArray[0].(string)
-		propertyValue := propArray[3]
 		propertyType := propArray[2].(string)
+		propertyValue := propArray[3]
 
 		switch propertyName {
 		case "version":
 			jcard.Version = propertyValue.(string)
 		case "fn":
 			jcard.FullName = propertyValue.(string)
+		// adr property is parsed according to the following specification
+		// https://datatracker.ietf.org/doc/html/rfc6350#section-6.3.1
 		case "adr":
 			if propertyType == "text" {
 				label, ok := propArray[1].(map[string]interface{})["label"].(string)

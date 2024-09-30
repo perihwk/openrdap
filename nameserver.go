@@ -3,6 +3,7 @@ package openrdap
 // Nameserver represents information of a DNS nameserver.
 //
 // Nameserver is a topmost RDAP response object.
+// https://datatracker.ietf.org/doc/html/rfc7483#section-5.2
 type Nameserver struct {
 	Common
 	Conformance     []string `json:"rdapConformance"`
