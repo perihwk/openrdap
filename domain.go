@@ -24,10 +24,10 @@ type Domain struct {
 	LDHName     string `json:"ldhName"`
 	UnicodeName string `json:"unicodename"`
 
-	Variants    []Variant             `json:"variants"`
-	Nameservers map[string]Nameserver `json:"nameservers"`
+	Variants    []Variant    `json:"variants"`
+	Nameservers []Nameserver `json:"nameservers"`
 
-	SecureDNS *SecureDNS
+	SecureDNS *SecureDNS `json:"secureDNS"`
 
 	Entities []Entity `json:"entities"`
 
@@ -65,9 +65,9 @@ type VariantName struct {
 // SecureDNS is ia subfield of Domain.
 type SecureDNS struct {
 	Common
-	ZoneSigned       *bool
-	DelegationSigned *bool
-	MaxSigLife       *uint64
+	ZoneSigned       bool      `json:"zoneSigned"`
+	DelegationSigned bool      `json:"delegationSigned"`
+	MaxSigLife       uint64    `json:"maxSigLife"`
 	DS               []DSData  `json:"dsData"`
 	Keys             []KeyData `json:"keyData"`
 }
@@ -75,23 +75,23 @@ type SecureDNS struct {
 // DSData is a subfield of Domain.
 type DSData struct {
 	Common
-	KeyTag     *uint64
-	Algorithm  *uint8
-	Digest     string
-	DigestType *uint8
+	KeyTag     uint64 `json:"keyTag"`
+	Algorithm  uint8  `json:"algorithm"`
+	Digest     string `json:"digest"`
+	DigestType uint8  `json:"digestType"`
 
-	Events []Event
-	Links  []Link
+	Events []Event `json:"events"`
+	Links  []Link  `json:"links"`
 }
 
 type KeyData struct {
-	Flags     *uint16
-	Protocol  *uint8
-	Algorithm *uint8
-	PublicKey string
+	Flags     uint16 `json:"flags"`
+	Protocol  uint8  `json:"protocol"`
+	Algorithm uint8  `json:"algorithm"`
+	PublicKey string `json:"publicKey"`
 
-	Events []Event
-	Links  []Link
+	Events []Event `json:"events"`
+	Links  []Link  `json:"links"`
 }
 
 func (d *Domain) UnmarshalJSON(data []byte) error {
@@ -104,14 +104,12 @@ func (d *Domain) UnmarshalJSON(data []byte) error {
 	temp := &struct {
 		*Alias
 
-		Events      []Event      `json:"events"`
-		Nameservers []Nameserver `json:"nameservers"`
+		Events []Event `json:"events"`
 	}{
 		Alias: (*Alias)(d),
 	}
 
 	d.Events = make(map[string]Event)
-	d.Nameservers = make(map[string]Nameserver)
 
 	if err := json.Unmarshal(data, temp); err != nil {
 		return fmt.Errorf("failed to parse events: %w", err)
@@ -119,10 +117,6 @@ func (d *Domain) UnmarshalJSON(data []byte) error {
 
 	for _, event := range temp.Events {
 		d.Events[event.Action] = event
-	}
-
-	for _, ns := range temp.Nameservers {
-		d.Nameservers[ns.LDHName] = ns
 	}
 
 	return nil
@@ -153,6 +147,13 @@ func (d *Domain) GetEntityFromRole(role string) (*Entity, error) {
 				return &entity, nil
 			}
 		}
+		for _, nestedEntity := range entity.Entities {
+			for _, nestedEntityRole := range nestedEntity.Roles {
+				if nestedEntityRole == role {
+					return &nestedEntity, nil
+				}
+			}
+		}
 	}
 	return nil, fmt.Errorf("unable to find an entity with role %s", role)
 }
@@ -164,4 +165,12 @@ func (d *Domain) GetRegistrarURL() (string, error) {
 		}
 	}
 	return "", fmt.Errorf("unable to find registrar URL")
+}
+
+func (d *Domain) GetNameServersDNS() []string {
+	var nameservers []string
+	for _, ns := range d.Nameservers {
+		nameservers = append(nameservers, ns.LDHName)
+	}
+	return nameservers
 }

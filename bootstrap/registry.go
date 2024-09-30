@@ -125,13 +125,7 @@ func (r *Registry) MarshalJSON() ([]byte, error) {
 	return json.Marshal(temp)
 }
 
-func (r *Registry) getNetServers(ipAddr string) ([]*url.URL, error) {
-	// Parse the IP address
-	ip := net.ParseIP(ipAddr)
-	if ip == nil {
-		return nil, fmt.Errorf("invalid IP address: %s", ipAddr)
-	}
-
+func (r *Registry) getNetServers(ipAddr net.IP) ([]*url.URL, error) {
 	for cidr, _ := range r.Services {
 		// Parse the CIDR block
 		_, ipNet, err := net.ParseCIDR(cidr)
@@ -140,7 +134,7 @@ func (r *Registry) getNetServers(ipAddr string) ([]*url.URL, error) {
 		}
 
 		// Check if the IP is in the CIDR range
-		if ipNet.Contains(ip) {
+		if ipNet.Contains(ipAddr) {
 			return r.Services[cidr], nil
 		}
 	}
@@ -151,6 +145,9 @@ func (r *Registry) getDNSServers(domain string) ([]*url.URL, error) {
 	parts := strings.Split(domain, ".")
 	tld := parts[len(parts)-1]
 
+	if r.Services[tld] == nil {
+		return nil, fmt.Errorf("domain tld %s does provide RDAP support", tld)
+	}
 	return r.Services[tld], nil
 }
 

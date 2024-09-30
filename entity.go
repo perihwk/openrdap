@@ -62,9 +62,6 @@ func (e *Entity) UnmarshalJSON(data []byte) error {
 
 // returns the first VCard that contains the specified role
 func (e *Entity) GetVCardFromRole(role string) (*VCard, error) {
-	if e.Roles == nil {
-		return nil, fmt.Errorf("no entities with the specified role")
-	}
 	for _, entityRole := range e.Roles {
 		if entityRole == role {
 			return &e.VCards[0], nil

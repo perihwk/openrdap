@@ -10,20 +10,20 @@ package openrdap
 type Autnum struct {
 	Common
 	Conformance     []string `json:"rdapConformance"`
-	ObjectClassName string
-	Notices         []Notice
+	ObjectClassName string   `json:"objectClassName"`
+	Notices         []Notice `json:"notices"`
 
-	Handle      string
-	StartAutnum *uint32
-	EndAutnum   *uint32
-	IPVersion   string `json:"ipVersion"`
-	Name        string
-	Type        string
-	Status      []string
-	Country     string
-	Entities    []Entity
-	Remarks     []Remark
-	Links       []Link
-	Port43      string
-	Events      []Event
+	Handle      string   `json:"handle"`
+	StartAutnum uint32   `json:"startAutnum"`
+	EndAutnum   uint32   `json:"endAutnum"`
+	IPVersion   string   `json:"ipVersion"`
+	Name        string   `json:"name"`
+	Type        string   `json:"type"`
+	Status      []string `json:"status"`
+	Country     string   `json:"country"`
+	Entities    []Entity `json:"entities"`
+	Remarks     []Remark `json:"remarks"`
+	Links       []Link   `json:"links"`
+	Port43      string   `json:"port43"`
+	Events      []Event  `json:"events"`
 }
