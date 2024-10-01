@@ -5,7 +5,6 @@
 package bootstrap
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,15 +15,13 @@ import (
 
 // Client implements an RDAP bootstrap client
 type Client struct {
-	ctx                     *context.Context
 	httpClient              *http.Client
 	serviceRegistryIndexURL string
 	registries              map[RegistryType]*Registry
 }
 
-func NewBootstrapClient(ctx *context.Context, httpClient *http.Client, serviceRegistryIndexURL string) *Client {
+func NewBootstrapClient(httpClient *http.Client, serviceRegistryIndexURL string) *Client {
 	return &Client{
-		ctx:                     ctx,
 		httpClient:              httpClient,
 		serviceRegistryIndexURL: serviceRegistryIndexURL,
 		registries:              make(map[RegistryType]*Registry),

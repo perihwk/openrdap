@@ -26,11 +26,11 @@ func main() {
 			ExpectContinueTimeout: 1 * time.Second,
 		},
 	}
-	bClient := bootstrap.NewBootstrapClient(&ctx, httpClient, "")
+	bClient := bootstrap.NewBootstrapClient(httpClient, "")
 
-	rdapClient := openrdap.NewClient(&ctx, httpClient, bClient)
+	rdapClient := openrdap.NewClient(httpClient, bClient)
 
-	domain, err := rdapClient.GetRDAPFromDomain("x.com")
+	domain, err := rdapClient.GetRDAPFromDomain(ctx, "x.com")
 	if err != nil {
 		fmt.Println(err)
 	}

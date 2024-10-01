@@ -40,30 +40,32 @@ func (r RegistrySearchType) Path() string {
 }
 
 type Client struct {
-	ctx             *context.Context
 	httpClient      *http.Client
 	bootstrapClient *bootstrap.Client
 }
 
 func NewClient(
-	ctx *context.Context,
 	httpClient *http.Client,
 	bootstrapClient *bootstrap.Client,
 ) *Client {
 
 	if bootstrapClient == nil {
-		bootstrapClient = bootstrap.NewBootstrapClient(ctx, httpClient, "")
+		bootstrapClient = bootstrap.NewBootstrapClient(httpClient, "")
 	}
 
 	return &Client{
-		ctx:             ctx,
 		httpClient:      httpClient,
 		bootstrapClient: bootstrapClient,
 	}
 }
 
-func (c *Client) GetRDAPInfoFromServer(rdapServer, query string, searchType RegistrySearchType) (*Domain, error) {
-	resp, err := c.httpClient.Get(rdapServer + fmt.Sprintf(searchType.Path(), query))
+func (c *Client) GetRDAPInfoFromServer(ctx context.Context, rdapServer, query string, searchType RegistrySearchType) (*Domain, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", rdapServer+fmt.Sprintf(searchType.Path(), query), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -86,7 +88,7 @@ func (c *Client) GetRDAPInfoFromServer(rdapServer, query string, searchType Regi
 	return domainResp, nil
 }
 
-func (c *Client) GetRDAPFromDomain(domain string) (*Domain, error) {
+func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain, error) {
 	registryServers, err := c.bootstrapClient.GetDomainRDAPServers(domain)
 	if err != nil {
 		return nil, err
@@ -99,7 +101,13 @@ func (c *Client) GetRDAPFromDomain(domain string) (*Domain, error) {
 			if u.Path, err = url.JoinPath(u.Path, "domain", domain); err != nil {
 				return nil, err
 			}
-			resp, err := c.httpClient.Get(u.String())
+
+			req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
+			if err != nil {
+				return nil, err
+			}
+
+			resp, err := c.httpClient.Do(req)
 			if err != nil {
 				return nil, err
 			}
@@ -122,7 +130,7 @@ func (c *Client) GetRDAPFromDomain(domain string) (*Domain, error) {
 	return domainResp, nil
 }
 
-func (c *Client) GetRDAPFromIP(ip string) (*IPNetwork, error) {
+func (c *Client) GetRDAPFromIP(ctx context.Context, ip string) (*IPNetwork, error) {
 	registryServers, err := c.bootstrapClient.GetIPAddressRDAPServers(ip)
 	if err != nil {
 		return nil, err
@@ -135,7 +143,12 @@ func (c *Client) GetRDAPFromIP(ip string) (*IPNetwork, error) {
 			if u.Path, err = url.JoinPath(u.Path, "ip", ip); err != nil {
 				return nil, err
 			}
-			resp, err := c.httpClient.Get(u.String())
+			req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
+			if err != nil {
+				return nil, err
+			}
+
+			resp, err := c.httpClient.Do(req)
 			if err != nil {
 				return nil, err
 			}
@@ -156,7 +169,7 @@ func (c *Client) GetRDAPFromIP(ip string) (*IPNetwork, error) {
 	return ipAddressResp, nil
 }
 
-func (c *Client) GetRDAPFromAutnum(asn string) (*Autnum, error) {
+func (c *Client) GetRDAPFromAutnum(ctx context.Context, asn string) (*Autnum, error) {
 	registryServers, err := c.bootstrapClient.GetAutnumRDAPServers(asn)
 	if err != nil {
 		return nil, err
@@ -169,7 +182,13 @@ func (c *Client) GetRDAPFromAutnum(asn string) (*Autnum, error) {
 			if u.Path, err = url.JoinPath(u.Path, "autnum", asn); err != nil {
 				return nil, err
 			}
-			resp, err := c.httpClient.Get(u.String())
+
+			req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
+			if err != nil {
+				return nil, err
+			}
+
+			resp, err := c.httpClient.Do(req)
 			if err != nil {
 				return nil, err
 			}
