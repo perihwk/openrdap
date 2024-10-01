@@ -40,29 +40,30 @@ func main() {
 	fmt.Printf("UpdatedDate: %s\n", domain.Events["last changed"].Date)
 	fmt.Printf("RegistrarExpirationDate: %s\n", domain.Events["expiration"].Date)
 	fmt.Printf("RegistrarWhoisServer: %s\n", domain.Port43)
-	fmt.Printf("NameServer: %v\n", domain.Nameservers)
-	fmt.Printf("DNSSec: %+v\n", domain.SecureDNS)
+	fmt.Printf("NameServer: %s\n", domain.GetNameServersDNS())
 
 	registrar, err := domain.GetEntityFromRole("registrar")
 	if err != nil {
 		fmt.Println(err)
+	} else {
+		fmt.Printf("Registrar: %s\n", registrar.VCards[0].FullName)
+		fmt.Printf("RegistrarIanaID: %s\n", registrar.Handle)
 	}
-	fmt.Printf("Registrar: %+v\n", registrar.VCards)
+
+	abuse, err := domain.GetEntityFromRole("abuse")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("RegistrarAbuseContactEmail: %s\n", abuse.VCards[0].Email)
+		fmt.Printf("RegistrarAbuseContactPhone: %s\n", abuse.VCards[0].Telephone)
+	}
 
 	registrarURL, err := domain.GetRegistrarURL()
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Printf("RegistrarURL: %+v\n", registrarURL)
-		fmt.Printf("RegistrarIanaID: %s\n", registrar.Handle)
+		fmt.Printf("RegistrarURL: %s\n", registrarURL)
 
-		abuse, err := registrar.GetVCardFromRole("abuse")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Printf("RegistrarAbuseContactEmail: %s\n", abuse.Email)
-		fmt.Printf("RegistrarAbuseContactPhone: %s\n", abuse.Telephone)
 	}
 	fmt.Printf("DomainStatus: %s\n", domain.Status)
 
@@ -70,41 +71,29 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		registrantInfo, err := registrantEntity.GetVCardFromRole("registrant")
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Printf("RegistrantOrganization: %v\n", registrantInfo.Org)
-		fmt.Printf("RegistrantState: %v\n", registrantInfo.Address)
-		fmt.Printf("RegistrantCountry: %v\n", registrantInfo.Address)
-		fmt.Printf("RegistrantEmail: %v\n", registrantInfo.Email)
+		fmt.Printf("RegistrantOrganization: %s\n", registrantEntity.VCards[0].Org)
+		fmt.Printf("RegistrantState: %+v\n", registrantEntity.VCards[0].Address)
+		fmt.Printf("RegistrantCountry: %+v\n", registrantEntity.VCards[0].Address)
+		fmt.Printf("RegistrantEmail: %s\n", registrantEntity.VCards[0].Email)
 	}
 
 	adminEntity, err := domain.GetEntityFromRole("administrative")
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		adminInfo, err := adminEntity.GetVCardFromRole("administrative")
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Printf("AdminOrganization: %v\n", adminInfo.Org)
-		fmt.Printf("AdminState: %v\n", adminInfo.Address)
-		fmt.Printf("AdminCountry: %v\n", adminInfo.Address)
-		fmt.Printf("AdminEmail: %v\n", adminInfo.Email)
+		fmt.Printf("AdminOrganization: %v\n", adminEntity.VCards[0].Org)
+		fmt.Printf("AdminState: %v\n", adminEntity.VCards[0].Address.Region)
+		fmt.Printf("AdminCountry: %v\n", adminEntity.VCards[0].Address.Country)
+		fmt.Printf("AdminEmail: %v\n", adminEntity.VCards[0].Email)
 	}
 
 	techEntity, err := domain.GetEntityFromRole("technical")
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		techInfo, err := techEntity.GetVCardFromRole("technical")
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Printf("TechOrganization: %v\n", techInfo.Org)
-		fmt.Printf("TechState: %v\n", techInfo.Address)
-		fmt.Printf("TechCountry: %v\n", techInfo.Address)
-		fmt.Printf("TechEmail: %v\n", techInfo.Email)
+		fmt.Printf("AdminOrganization: %v\n", techEntity.VCards[0].Org)
+		fmt.Printf("AdminState: %v\n", techEntity.VCards[0].Address.Region)
+		fmt.Printf("AdminCountry: %v\n", techEntity.VCards[0].Address.Country)
+		fmt.Printf("AdminEmail: %v\n", techEntity.VCards[0].Email)
 	}
 }

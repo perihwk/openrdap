@@ -56,7 +56,6 @@ func (r RegistryType) ServiceRegistryIndexURL(baseURL string) string {
 }
 
 type Registry struct {
-	Type        RegistryType          `json:"-"`
 	Version     string                `json:"version"`
 	Publication string                `json:"publication"`
 	Description string                `json:"description"`
