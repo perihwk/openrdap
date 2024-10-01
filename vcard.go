@@ -1,6 +1,9 @@
 package openrdap
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // A jCard consists of an array of properties (e.g. "fn", "tel") describing the
 // individual or entity. Properties may be repeated, e.g. to represent multiple
@@ -40,7 +43,7 @@ type Address struct {
 	Locality        string // city
 	Region          string // state or province
 	PostalCode      string
-	CountryName     string
+	Country         string
 }
 
 // ParseJCard parses a jCard from its JSON representation
@@ -80,6 +83,10 @@ func parseJCard(jcardData []interface{}) (VCard, error) {
 			if propertyType == "text" {
 				label, ok := propArray[1].(map[string]interface{})["label"].(string)
 				if ok {
+					parsedAddr, err := parseAddressFromLabel(label)
+					if err == nil {
+						jcard.Address = *parsedAddr
+					}
 					jcard.Address.Label = label
 				}
 			} else if propertyType == "array" {
@@ -93,9 +100,8 @@ func parseJCard(jcardData []interface{}) (VCard, error) {
 				jcard.Address.Locality = structuredAddress[3]
 				jcard.Address.Region = structuredAddress[4]
 				jcard.Address.PostalCode = structuredAddress[5]
-				jcard.Address.CountryName = structuredAddress[6]
+				jcard.Address.Country = structuredAddress[6]
 			}
-
 		case "kind":
 			jcard.Kind = propertyValue.(string)
 		case "email":
@@ -108,4 +114,44 @@ func parseJCard(jcardData []interface{}) (VCard, error) {
 	}
 
 	return jcard, nil
+}
+
+func parseAddressFromLabel(label string) (*Address, error) {
+	parts := strings.Split(label, "\n")
+
+	addr := &Address{}
+
+	// Iterate from the end of the slice to the beginning
+	for i := len(parts) - 1; i >= 0; i-- {
+		part := strings.TrimSpace(parts[i]) // Clean up any leading/trailing whitespace
+
+		switch len(parts) - 1 - i {
+		case 0: // CountryName
+			addr.Country = part
+		case 1: // PostalCode
+			addr.PostalCode = part
+		case 2: // Region (state or province)
+			addr.Region = part
+		case 3: // Locality (city)
+			addr.Locality = part
+		case 4: // StreetAddress
+			upper := strings.ToUpper(part)
+			if strings.Contains(upper, "PO") || strings.Contains(upper, "P.O") {
+				addr.PostOfficeBox = part
+			} else {
+				addr.StreetAddress = part
+			}
+		case 5: // ExtendedAddress (apartment or suite)
+			upper := strings.ToUpper(part)
+			if strings.Contains(upper, "PO") || strings.Contains(upper, "P.O") {
+				addr.PostOfficeBox = part
+			} else {
+				addr.ExtendedAddress = part
+			}
+		case 6: // PostOfficeBox
+			addr.PostOfficeBox = part
+		}
+	}
+
+	return addr, nil
 }
