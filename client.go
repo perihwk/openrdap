@@ -7,7 +7,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"openrdap/bootstrap"
+
+	"github.com/perihwk/openrdap/bootstrap"
 )
 
 // A RegistrySearch represents a registry search type.

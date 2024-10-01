@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"openrdap"
-	"openrdap/bootstrap"
 	"time"
+
+	"github.com/perihwk/openrdap"
+	"github.com/perihwk/openrdap/bootstrap"
 )
 
 func main() {
