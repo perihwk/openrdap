@@ -89,7 +89,7 @@ func (c *Client) GetRDAPInfoFromServer(ctx context.Context, rdapServer, query st
 }
 
 func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain, error) {
-	registryServers, err := c.bootstrapClient.GetDomainRDAPServers(domain)
+	registryServers, err := c.bootstrapClient.GetDomainRDAPServers(ctx, domain)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain,
 }
 
 func (c *Client) GetRDAPFromIP(ctx context.Context, ip string) (*IPNetwork, error) {
-	registryServers, err := c.bootstrapClient.GetIPAddressRDAPServers(ip)
+	registryServers, err := c.bootstrapClient.GetIPAddressRDAPServers(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func (c *Client) GetRDAPFromIP(ctx context.Context, ip string) (*IPNetwork, erro
 }
 
 func (c *Client) GetRDAPFromAutnum(ctx context.Context, asn string) (*Autnum, error) {
-	registryServers, err := c.bootstrapClient.GetAutnumRDAPServers(asn)
+	registryServers, err := c.bootstrapClient.GetAutnumRDAPServers(ctx, asn)
 	if err != nil {
 		return nil, err
 	}
