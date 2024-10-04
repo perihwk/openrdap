@@ -30,7 +30,7 @@ func main() {
 
 	rdapClient := openrdap.NewClient(httpClient, bClient)
 
-	domain, err := rdapClient.GetRDAPFromDomain(ctx, "x.com")
+	domain, err := rdapClient.GetRDAPFromDomain(ctx, "aky725095q.vip")
 	if err != nil {
 		fmt.Println(err)
 	}

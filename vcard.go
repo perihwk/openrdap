@@ -50,6 +50,10 @@ type Address struct {
 func parseJCard(jcardData []interface{}) (VCard, error) {
 	var jcard VCard
 
+	if jcardData == nil {
+		return jcard, nil
+	}
+
 	if jcardData[0] != "vcard" {
 		return jcard, fmt.Errorf("not a vcard")
 	}
@@ -69,7 +73,6 @@ func parseJCard(jcardData []interface{}) (VCard, error) {
 
 		// Parse the jCard field based on the property type (first element)
 		propertyName := propArray[0].(string)
-		propertyType := propArray[2].(string)
 		propertyValue := propArray[3]
 
 		switch propertyName {
@@ -80,27 +83,40 @@ func parseJCard(jcardData []interface{}) (VCard, error) {
 		// adr property is parsed according to the following specification
 		// https://datatracker.ietf.org/doc/html/rfc6350#section-6.3.1
 		case "adr":
-			if propertyType == "text" {
-				label, ok := propArray[1].(map[string]interface{})["label"].(string)
-				if ok {
-					parsedAddr, err := parseAddressFromLabel(label)
-					if err == nil {
-						jcard.Address = *parsedAddr
+			label, ok := propArray[1].(map[string]interface{})["label"].(string)
+			if ok {
+				parsedAddr, err := parseAddressFromLabel(label)
+				if err == nil {
+					jcard.Address = *parsedAddr
+				}
+				jcard.Address.Label = label
+			} else {
+				if structuredAddress, ok := propArray[3].([]interface{}); ok {
+					for i, v := range structuredAddress {
+						str, ok := v.(string)
+						if !ok {
+							continue
+						}
+
+						switch i {
+						case 0:
+							jcard.Address.PostOfficeBox = str
+						case 1:
+							jcard.Address.ExtendedAddress = str
+						case 2:
+							jcard.Address.StreetAddress = str
+						case 3:
+							jcard.Address.Locality = str
+						case 4:
+							jcard.Address.Region = str
+						case 5:
+							jcard.Address.PostalCode = str
+						case 6:
+							jcard.Address.Country = str
+
+						}
 					}
-					jcard.Address.Label = label
 				}
-			} else if propertyType == "array" {
-				structuredAddress, ok := propArray[3].([]string)
-				if !ok {
-					continue
-				}
-				jcard.Address.PostOfficeBox = structuredAddress[0]
-				jcard.Address.ExtendedAddress = structuredAddress[1]
-				jcard.Address.StreetAddress = structuredAddress[2]
-				jcard.Address.Locality = structuredAddress[3]
-				jcard.Address.Region = structuredAddress[4]
-				jcard.Address.PostalCode = structuredAddress[5]
-				jcard.Address.Country = structuredAddress[6]
 			}
 		case "kind":
 			jcard.Kind = propertyValue.(string)

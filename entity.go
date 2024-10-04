@@ -16,7 +16,7 @@ type Entity struct {
 	Notices         []Notice
 
 	Handle       string
-	VCards       []VCard `json:"vcardArray"`
+	VCards       []VCard
 	Roles        []string
 	PublicIDs    []PublicID
 	Entities     []Entity
