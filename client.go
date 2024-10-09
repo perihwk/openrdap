@@ -72,7 +72,7 @@ func (c *Client) GetRDAPInfoFromServer(ctx context.Context, rdapServer, query st
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		fmt.Printf("server returned non-200 status code: %s", resp.Status)
+		fmt.Printf("server %s returned non-200 status code: %s", rdapServer, resp.Status)
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -114,7 +114,7 @@ func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain,
 			defer resp.Body.Close()
 
 			if resp.StatusCode != 200 {
-				return nil, fmt.Errorf("server returned non-200 status code: %s", resp.Status)
+				return nil, fmt.Errorf("server %s returned non-200 status code: %s", u.Path, resp.Status)
 			}
 
 			body, err := io.ReadAll(resp.Body)
@@ -154,7 +154,7 @@ func (c *Client) GetRDAPFromIP(ctx context.Context, ip string) (*IPNetwork, erro
 			}
 
 			if resp.StatusCode != 200 {
-				return nil, fmt.Errorf("server returned non-200 status code: %s", resp.Status)
+				return nil, fmt.Errorf("server %s returned non-200 status code: %s", u.Path, resp.Status)
 			}
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -194,7 +194,7 @@ func (c *Client) GetRDAPFromAutnum(ctx context.Context, asn string) (*Autnum, er
 			}
 
 			if resp.StatusCode != 200 {
-				return nil, fmt.Errorf("server returned non-200 status code: %s", resp.Status)
+				return nil, fmt.Errorf("server %s returned non-200 status code: %s", u.Path, resp.Status)
 			}
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
