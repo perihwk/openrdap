@@ -1,10 +1,5 @@
 package openrdap
 
-import (
-	"encoding/json"
-	"fmt"
-)
-
 // Domain represents information about a DNS name and point of delegation.
 //
 // Domain is a topmost RDAP response object.
@@ -37,10 +32,10 @@ type Domain struct {
 	PublicIDs []PublicID `json:"publicIds"`
 	Remarks   []Remark   `json:"remarks"`
 
-	Links   []Link           `json:"links"`
-	Port43  string           `json:"port43"`
-	Events  map[string]Event `json:"events"`
-	Network *IPNetwork       `json:"network"`
+	Links   []Link     `json:"links"`
+	Port43  string     `json:"port43"`
+	Events  []Event    `json:"events"`
+	Network *IPNetwork `json:"network"`
 }
 
 // Variant is a subfield of Domain.
@@ -90,6 +85,7 @@ type KeyData struct {
 	Links  []Link  `json:"links"`
 }
 
+/*
 func (d *Domain) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" || string(data) == `""` {
 		return nil
@@ -135,32 +131,42 @@ func (d *Domain) MarshalJSON() ([]byte, error) {
 	// Marshal the temp struct with the []Event
 	return json.Marshal(temp)
 }
+*/
 
-func (d *Domain) GetEntityFromRole(role string) (*Entity, error) {
+func (d *Domain) GetEventByName(name string) *Event {
+	for _, event := range d.Events {
+		if event.Action == name {
+			return &event
+		}
+	}
+	return nil
+}
+
+func (d *Domain) GetEntityFromRole(role string) *Entity {
 	for _, entity := range d.Entities {
 		for _, entityRole := range entity.Roles {
 			if entityRole == role {
-				return &entity, nil
+				return &entity
 			}
 		}
 		for _, nestedEntity := range entity.Entities {
 			for _, nestedEntityRole := range nestedEntity.Roles {
 				if nestedEntityRole == role {
-					return &nestedEntity, nil
+					return &nestedEntity
 				}
 			}
 		}
 	}
-	return nil, fmt.Errorf("unable to find an entity with role %s", role)
+	return nil
 }
 
-func (d *Domain) GetRegistrarURL() (string, error) {
+func (d *Domain) GetRegistrarURL() string {
 	for _, link := range d.Links {
 		if link.Rel == "self" {
-			return link.Value, nil
+			return link.Value
 		}
 	}
-	return "", fmt.Errorf("unable to find registrar URL")
+	return ""
 }
 
 func (d *Domain) GetNameServersDNS() []string {
