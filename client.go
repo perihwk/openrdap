@@ -96,13 +96,14 @@ func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain,
 
 	var domainResp *Domain
 	for i, u := range registryServers {
+		localSrv := u.String()
 		// use first https RDAP server. If no https server then use whatever the last option was
 		if u.Scheme == "https" || i == len(registryServers)-1 {
-			if u.Path, err = url.JoinPath(u.Path, "domain", domain); err != nil {
+			if localSrv, err = url.JoinPath(localSrv, "domain", domain); err != nil {
 				return nil, err
 			}
 
-			req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
+			req, err := http.NewRequestWithContext(ctx, "GET", localSrv, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -114,7 +115,7 @@ func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain,
 			defer resp.Body.Close()
 
 			if resp.StatusCode != 200 {
-				return nil, fmt.Errorf("server %s returned non-200 status code: %s", u.Path, resp.Status)
+				return nil, fmt.Errorf("server %s returned non-200 status code: %s", localSrv, resp.Status)
 			}
 
 			body, err := io.ReadAll(resp.Body)
