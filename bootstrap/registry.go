@@ -125,11 +125,11 @@ func (r *Registry) MarshalJSON() ([]byte, error) {
 }
 
 func (r *Registry) getNetServers(ipAddr net.IP) ([]*url.URL, error) {
-	for cidr, _ := range r.Services {
+	for cidr := range r.Services {
 		// Parse the CIDR block
 		_, ipNet, err := net.ParseCIDR(cidr)
 		if err != nil {
-			return nil, fmt.Errorf("invalid CIDR block: %s", cidr)
+			return nil, ErrInvalidCIDR
 		}
 
 		// Check if the IP is in the CIDR range
@@ -137,7 +137,7 @@ func (r *Registry) getNetServers(ipAddr net.IP) ([]*url.URL, error) {
 			return r.Services[cidr], nil
 		}
 	}
-	return nil, fmt.Errorf("RDAP server for ip address %s cannot be found", ipAddr)
+	return nil, ErrRDAPNotSupported
 }
 
 func (r *Registry) getDNSServers(domain string) ([]*url.URL, error) {
@@ -145,7 +145,7 @@ func (r *Registry) getDNSServers(domain string) ([]*url.URL, error) {
 	tld := parts[len(parts)-1]
 
 	if r.Services[tld] == nil {
-		return nil, fmt.Errorf("domain tld %s does not provide RDAP support", tld)
+		return nil, ErrRDAPNotSupported
 	}
 	return r.Services[tld], nil
 }
@@ -159,7 +159,7 @@ func (r *Registry) getASNServers(input string) ([]*url.URL, error) {
 	for rangeKey, urls := range r.Services {
 		rangeParts := strings.Split(rangeKey, "-")
 		if len(rangeParts) > 2 {
-			return nil, fmt.Errorf("invalid ASN range %s: %w", rangeKey, err)
+			return nil, ErrInvalidASNRange
 		}
 
 		minASN, err := strconv.ParseUint(rangeParts[0], 10, 32)
@@ -185,5 +185,5 @@ func (r *Registry) getASNServers(input string) ([]*url.URL, error) {
 			return urls, nil
 		}
 	}
-	return nil, fmt.Errorf("could not find proper range for ASN %s", input)
+	return nil, ErrRDAPNotSupported
 }
