@@ -132,6 +132,7 @@ func parseJCard(jcardData []interface{}) (VCard, error) {
 	return jcard, nil
 }
 
+// attempts to parse the address from the label string using its position
 func parseAddressFromLabel(label string) (*Address, error) {
 	parts := strings.Split(label, "\n")
 
@@ -154,6 +155,8 @@ func parseAddressFromLabel(label string) (*Address, error) {
 			upper := strings.ToUpper(part)
 			if strings.Contains(upper, "PO") || strings.Contains(upper, "P.O") {
 				addr.PostOfficeBox = part
+			} else if strings.HasPrefix(upper, "SUITE") || strings.HasPrefix(upper, "APT") {
+				addr.ExtendedAddress = part
 			} else {
 				addr.StreetAddress = part
 			}
@@ -161,8 +164,10 @@ func parseAddressFromLabel(label string) (*Address, error) {
 			upper := strings.ToUpper(part)
 			if strings.Contains(upper, "PO") || strings.Contains(upper, "P.O") {
 				addr.PostOfficeBox = part
-			} else {
+			} else if addr.ExtendedAddress == "" {
 				addr.ExtendedAddress = part
+			} else {
+				addr.StreetAddress = part
 			}
 		case 6: // PostOfficeBox
 			addr.PostOfficeBox = part
