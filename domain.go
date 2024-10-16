@@ -85,54 +85,6 @@ type KeyData struct {
 	Links  []Link  `json:"links"`
 }
 
-/*
-func (d *Domain) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" || string(data) == `""` {
-		return nil
-	}
-
-	type Alias Domain
-
-	temp := &struct {
-		*Alias
-
-		Events []Event `json:"events"`
-	}{
-		Alias: (*Alias)(d),
-	}
-
-	d.Events = make(map[string]Event)
-
-	if err := json.Unmarshal(data, temp); err != nil {
-		return fmt.Errorf("failed to parse events: %w", err)
-	}
-
-	for _, event := range temp.Events {
-		d.Events[event.Action] = event
-	}
-
-	return nil
-}
-
-func (d *Domain) MarshalJSON() ([]byte, error) {
-	// Convert map[string]Event back to []Event for JSON serialization
-	events := make([]Event, 0, len(d.Events))
-	for _, event := range d.Events {
-		events = append(events, event)
-	}
-
-	// Create a temporary struct to hold the events array
-	temp := struct {
-		Events []Event `json:"events"`
-	}{
-		Events: events,
-	}
-
-	// Marshal the temp struct with the []Event
-	return json.Marshal(temp)
-}
-*/
-
 func (d *Domain) GetEventByName(name string) *Event {
 	for _, event := range d.Events {
 		if event.Action == name {
