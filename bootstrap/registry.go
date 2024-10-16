@@ -145,7 +145,7 @@ func (r *Registry) getDNSServers(domain string) ([]*url.URL, error) {
 	tld := parts[len(parts)-1]
 
 	if r.Services[tld] == nil {
-		return nil, ErrRDAPNotSupported
+		return nil, fmt.Errorf("tld %s not supported: %w", tld, ErrRDAPNotSupported)
 	}
 	return r.Services[tld], nil
 }
