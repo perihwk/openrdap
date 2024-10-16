@@ -1,0 +1,290 @@
+{
+    "rdapConformance": [
+      "nro_rdap_profile_0",
+      "nro_rdap_profile_asn_hierarchical_0",
+      "cidr0",
+      "rdap_level_0"
+    ],
+    "notices": [
+      {
+        "title": "Source",
+        "description": [
+          "Objects returned came from source",
+          "KRNIC"
+        ]
+      },
+      {
+        "title": "Terms and Conditions",
+        "description": [
+          "This is the APNIC WHOIS Database query service. The objects are in RDAP format.",
+          "This information has been partially mirrored by APNIC from KRNIC. To obtain more specific information, please use the KRNIC whois server at whois.kisa.or.kr."
+        ],
+        "links": [
+          {
+            "value": "https://krnic.rdap.apnic.net/autnum/23552",
+            "rel": "terms-of-service",
+            "href": "http://www.apnic.net/db/dbcopyright.html",
+            "type": "text/html"
+          }
+        ]
+      },
+      {
+        "title": "Whois Inaccuracy Reporting",
+        "description": [
+          "If you see inaccuracies in the results, please visit: "
+        ],
+        "links": [
+          {
+            "value": "https://krnic.rdap.apnic.net/autnum/23552",
+            "rel": "inaccuracy-report",
+            "href": "https://www.apnic.net/manage-ip/using-whois/abuse-and-spamming/invalid-contact-form",
+            "type": "text/html"
+          }
+        ]
+      }
+    ],
+    "country": "KR",
+    "name": "KORNU-AS-KR-KR",
+    "remarks": [
+      {
+        "description": [
+          "Korea Nazarene University"
+        ],
+        "title": "description"
+      }
+    ],
+    "links": [
+      {
+        "value": "https://krnic.rdap.apnic.net/autnum/23552",
+        "rel": "self",
+        "href": "https://krnic.rdap.apnic.net/autnum/23552",
+        "type": "application/rdap+json"
+      },
+      {
+        "value": "https://krnic.rdap.apnic.net/autnum/23552",
+        "rel": "related",
+        "href": "https://netox.apnic.net/search/AS23552?utm_source=rdap&utm_medium=result&utm_campaign=rdap_result",
+        "type": "text/html"
+      }
+    ],
+    "status": [
+      "active"
+    ],
+    "handle": "AS23552",
+    "endAutnum": 23552,
+    "startAutnum": 23552,
+    "objectClassName": "autnum",
+    "entities": [
+      {
+        "roles": [
+          "administrative"
+        ],
+        "links": [
+          {
+            "value": "https://krnic.rdap.apnic.net/autnum/23552",
+            "rel": "self",
+            "href": "https://krnic.rdap.apnic.net/entity/HK507-KR",
+            "type": "application/rdap+json"
+          }
+        ],
+        "vcardArray": [
+          "vcard",
+          [
+            [
+              "version",
+              {},
+              "text",
+              "4.0"
+            ],
+            [
+              "fn",
+              {},
+              "text",
+              "AS Manager"
+            ],
+            [
+              "kind",
+              {},
+              "text",
+              "individual"
+            ],
+            [
+              "adr",
+              {
+                "label": "Chungcheongnam-do Seobuk-gu, Cheonan-si Wolbong-ro 48\nKorea Nazarene University"
+              },
+              "text",
+              [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+              ]
+            ],
+            [
+              "tel",
+              {
+                "type": "voice"
+              },
+              "text",
+              "+82-41-570-7741"
+            ],
+            [
+              "email",
+              {},
+              "text",
+              "jhshin@kornu.ac.kr"
+            ]
+          ]
+        ],
+        "objectClassName": "entity",
+        "handle": "HK507-KR"
+      },
+      {
+        "roles": [
+          "abuse"
+        ],
+        "events": [
+          {
+            "eventAction": "last changed",
+            "eventDate": "2017-10-19T07:36:36Z"
+          }
+        ],
+        "links": [
+          {
+            "value": "https://krnic.rdap.apnic.net/autnum/23552",
+            "rel": "self",
+            "href": "https://krnic.rdap.apnic.net/entity/IRT-KRNIC-KR",
+            "type": "application/rdap+json"
+          }
+        ],
+        "vcardArray": [
+          "vcard",
+          [
+            [
+              "version",
+              {},
+              "text",
+              "4.0"
+            ],
+            [
+              "fn",
+              {},
+              "text",
+              "IRT-KRNIC-KR"
+            ],
+            [
+              "kind",
+              {},
+              "text",
+              "group"
+            ],
+            [
+              "adr",
+              {
+                "label": "Seocho-ro 398, Seocho-gu, Seoul, Korea"
+              },
+              "text",
+              [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+              ]
+            ],
+            [
+              "email",
+              {},
+              "text",
+              "hostmaster@nic.or.kr"
+            ],
+            [
+              "email",
+              {
+                "pref": "1"
+              },
+              "text",
+              "hostmaster@nic.or.kr"
+            ]
+          ]
+        ],
+        "objectClassName": "entity",
+        "handle": "IRT-KRNIC-KR"
+      },
+      {
+        "roles": [
+          "technical"
+        ],
+        "links": [
+          {
+            "value": "https://krnic.rdap.apnic.net/autnum/23552",
+            "rel": "self",
+            "href": "https://krnic.rdap.apnic.net/entity/507-KR",
+            "type": "application/rdap+json"
+          }
+        ],
+        "vcardArray": [
+          "vcard",
+          [
+            [
+              "version",
+              {},
+              "text",
+              "4.0"
+            ],
+            [
+              "fn",
+              {},
+              "text",
+              "AS Manager"
+            ],
+            [
+              "kind",
+              {},
+              "text",
+              "individual"
+            ],
+            [
+              "adr",
+              {
+                "label": "Chungcheongnam-do Seobuk-gu, Cheonan-si Wolbong-ro 48\nKorea Nazarene University"
+              },
+              "text",
+              [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+              ]
+            ],
+            [
+              "tel",
+              {
+                "type": "voice"
+              },
+              "text",
+              "+82-41-570-7741"
+            ],
+            [
+              "email",
+              {},
+              "text",
+              "jhshin@kornu.ac.kr"
+            ]
+          ]
+        ],
+        "objectClassName": "entity",
+        "handle": "507-KR"
+      }
+    ],
+    "port43": "whois.apnic.net"
+  }
