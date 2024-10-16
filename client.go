@@ -59,7 +59,7 @@ func NewClient(
 	}
 }
 
-func (c *Client) GetRDAPInfoFromServer(ctx context.Context, rdapServer, query string, searchType RegistrySearchType) (*Domain, error) {
+func (c *Client) GetRDAPInfoFromServer(ctx context.Context, rdapServer, query string, searchType RegistrySearchType) (any, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", rdapServer+fmt.Sprintf(searchType.Path(), query), nil)
 	if err != nil {
 		return nil, err
@@ -80,12 +80,23 @@ func (c *Client) GetRDAPInfoFromServer(ctx context.Context, rdapServer, query st
 		fmt.Printf("err: %v\n", err)
 	}
 
-	var domainResp *Domain
-	if err = json.Unmarshal(body, &domainResp); err != nil {
+	var result interface{}
+	switch searchType {
+	case DNS:
+		result = &Domain{}
+	case IPv4, IPv6:
+		result = &IPNetwork{}
+	case ASN:
+		result = &Autnum{}
+	default:
+		return nil, fmt.Errorf("unsupported search type")
+	}
+
+	if err = json.Unmarshal(body, result); err != nil {
 		return nil, fmt.Errorf("error parsing RDAP response: %w", err)
 	}
 
-	return domainResp, nil
+	return result, nil
 }
 
 func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain, error) {
