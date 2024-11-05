@@ -77,55 +77,45 @@ func parseJCard(jcardData []interface{}) (VCard, error) {
 
 		switch propertyName {
 		case "version":
-			jcard.Version = propertyValue.(string)
+			if version, ok := propertyValue.(string); ok {
+				jcard.Version = version
+			}
 		case "fn":
-			jcard.FullName = propertyValue.(string)
+			if fn, ok := propertyValue.(string); ok {
+				jcard.FullName = fn
+			}
 		// adr property is parsed according to the following specification
 		// https://datatracker.ietf.org/doc/html/rfc6350#section-6.3.1
 		case "adr":
-			label, ok := propArray[1].(map[string]interface{})["label"].(string)
-			if ok {
-				parsedAddr, err := parseAddressFromLabel(label)
-				if err == nil {
-					jcard.Address = *parsedAddr
-				}
-				jcard.Address.Label = label
-			} else {
-				if structuredAddress, ok := propArray[3].([]interface{}); ok {
-					for i, v := range structuredAddress {
-						str, ok := v.(string)
-						if !ok {
-							continue
-						}
-
-						switch i {
-						case 0:
-							jcard.Address.PostOfficeBox = str
-						case 1:
-							jcard.Address.ExtendedAddress = str
-						case 2:
-							jcard.Address.StreetAddress = str
-						case 3:
-							jcard.Address.Locality = str
-						case 4:
-							jcard.Address.Region = str
-						case 5:
-							jcard.Address.PostalCode = str
-						case 6:
-							jcard.Address.Country = str
-
-						}
+			if propMap, ok := propArray[1].(map[string]interface{}); ok {
+				if label, ok := propMap["label"].(string); ok {
+					parsedAddr, err := parseAddressFromLabel(label)
+					if err == nil {
+						jcard.Address = *parsedAddr
 					}
+					jcard.Address.Label = label
 				}
 			}
+
+			if addr := parseStructuredAddress(propArray); addr != nil {
+				jcard.Address = *addr
+			}
 		case "kind":
-			jcard.Kind = propertyValue.(string)
+			if kind, ok := propertyValue.(string); ok {
+				jcard.Kind = kind
+			}
 		case "email":
-			jcard.Email = propertyValue.(string)
+			if email, ok := propertyValue.(string); ok {
+				jcard.Email = email
+			}
 		case "tel":
-			jcard.Telephone = propertyValue.(string)
+			if telephone, ok := propertyValue.(string); ok {
+				jcard.Telephone = telephone
+			}
 		case "org":
-			jcard.Org = propertyValue.(string)
+			if org, ok := propertyValue.(string); ok {
+				jcard.Org = org
+			}
 		}
 	}
 
@@ -175,4 +165,41 @@ func parseAddressFromLabel(label string) (*Address, error) {
 	}
 
 	return addr, nil
+}
+
+// parseStructuredAddress parses a structured address if available.
+func parseStructuredAddress(propArray []interface{}) *Address {
+	if structuredAddress, ok := propArray[3].([]interface{}); ok {
+		addr := &Address{}
+		emptyAddr := true // track if all the fields are ""
+		for i, v := range structuredAddress {
+			if str, ok := v.(string); ok {
+				switch i {
+				case 0:
+					addr.PostOfficeBox = str
+				case 1:
+					addr.ExtendedAddress = str
+				case 2:
+					addr.StreetAddress = str
+				case 3:
+					addr.Locality = str
+				case 4:
+					addr.Region = str
+				case 5:
+					addr.PostalCode = str
+				case 6:
+					addr.Country = str
+				}
+				if str != "" {
+					emptyAddr = false
+				}
+			}
+		}
+
+		if emptyAddr {
+			return nil
+		}
+		return addr
+	}
+	return nil
 }
