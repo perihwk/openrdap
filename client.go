@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/perihwk/openrdap/bootstrap"
 )
@@ -187,6 +188,7 @@ func (c *Client) GetRDAPFromAutnum(ctx context.Context, asn string) (*Autnum, er
 		return nil, err
 	}
 
+	asn = strings.TrimPrefix(strings.ToUpper(asn), "AS")
 	var autnumResp *Autnum
 	for i, u := range registryServers {
 		// use first https RDAP server. If no https server then use whatever the last option was

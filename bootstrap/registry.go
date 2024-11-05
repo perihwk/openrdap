@@ -36,6 +36,23 @@ func (r RegistryType) String() string {
 	}
 }
 
+// Validate the RegistryType value
+func (r *RegistryType) Set(value string) error {
+	switch strings.ToLower(value) {
+	case "dns":
+		*r = DNS
+	case "ipv4":
+		*r = IPv4
+	case "ipv6":
+		*r = IPv6
+	case "asn":
+		*r = ASN
+	default:
+		return fmt.Errorf("invalid registry-type %s, must be one of: dns, ipv4, ipv6, asn", value)
+	}
+	return nil
+}
+
 func (r RegistryType) ServiceRegistryIndexURL(baseURL string) string {
 	if baseURL == "" {
 		baseURL = ServiceRegistryDefaultBaseURL
@@ -181,7 +198,7 @@ func (r *Registry) getASNServers(input string) ([]*url.URL, error) {
 			return nil, err
 		}
 
-		if asn > minASN && asn <= maxASN {
+		if asn >= minASN && asn <= maxASN {
 			return urls, nil
 		}
 	}
