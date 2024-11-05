@@ -1,45 +1,20 @@
-package main
+package openrdap
 
-import (
-	"context"
-	"fmt"
-	"net"
-	"net/http"
-	"time"
+import "fmt"
 
-	"github.com/perihwk/openrdap"
-	"github.com/perihwk/openrdap/bootstrap"
-)
-
-func main() {
-
-	ctx := context.Background()
-
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			Dial: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).Dial,
-			TLSHandshakeTimeout:   10 * time.Second,
-			ResponseHeaderTimeout: 10 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-		},
-	}
-	bClient := bootstrap.NewBootstrapClient(httpClient, "")
-
-	rdapClient := openrdap.NewClient(httpClient, bClient)
-
-	domain, err := rdapClient.GetRDAPFromDomain(ctx, "perihwk.com")
-	if err != nil {
-		fmt.Println(err)
-	}
-
+func PrintDomainRDAP(domain *Domain) {
 	fmt.Printf("RegistryDomainID: %s\n", domain.Handle)
 	fmt.Printf("DomainName: %s\n", domain.LDHName)
-	fmt.Printf("CreatedDate: %s\n", domain.GetEventByName("registration").Date)
-	fmt.Printf("UpdatedDate: %s\n", domain.GetEventByName("last changed").Date)
-	fmt.Printf("RegistrarExpirationDate: %s\n", domain.GetEventByName("expiration").Date)
+
+	if event := domain.GetEventByName("registration"); event != nil {
+		fmt.Printf("CreatedDate: %s\n", event.Date)
+	}
+	if event := domain.GetEventByName("last changed"); event != nil {
+		fmt.Printf("UpdatedDate: %s\n", event.Date)
+	}
+	if event := domain.GetEventByName("expiration"); event != nil {
+		fmt.Printf("RegistrarExpirationDate: %s\n", event.Date)
+	}
 	fmt.Printf("RegistrarWhoisServer: %s\n", domain.Port43)
 	fmt.Printf("NameServer: %s\n", domain.GetNameServersDNS())
 	fmt.Printf("DomainStatus: %s\n", domain.Status)
@@ -79,9 +54,13 @@ func main() {
 
 	techEntity := domain.GetEntityFromRole("technical")
 	if techEntity != nil {
-		fmt.Printf("AdminOrganization: %v\n", techEntity.VCards[0].Org)
-		fmt.Printf("AdminState: %v\n", techEntity.VCards[0].Address.Region)
-		fmt.Printf("AdminCountry: %v\n", techEntity.VCards[0].Address.Country)
-		fmt.Printf("AdminEmail: %v\n", techEntity.VCards[0].Email)
+		fmt.Printf("TechOrganization: %v\n", techEntity.VCards[0].Org)
+		fmt.Printf("TechState: %v\n", techEntity.VCards[0].Address.Region)
+		fmt.Printf("TechCountry: %v\n", techEntity.VCards[0].Address.Country)
+		fmt.Printf("TechEmail: %v\n", techEntity.VCards[0].Email)
 	}
+}
+
+func PrintAutnumRDAP(asn *Autnum) {
+	fmt.Printf("%+v\n", asn)
 }
