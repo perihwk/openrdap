@@ -12,7 +12,7 @@ func parseURLs(urls []string) ([]*url.URL, error) {
 	parsedURLs := make([]*url.URL, 0, len(urls))
 	for _, u := range urls {
 		parsedURL, err := url.Parse(u)
-		if err != nil {
+		if err != nil || parsedURL.Scheme == "" {
 			return nil, fmt.Errorf("invalid URL %s: %w", u, err)
 		}
 		parsedURLs = append(parsedURLs, parsedURL)
