@@ -12,6 +12,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"sync"
 )
 
 // Client implements an RDAP bootstrap client
@@ -19,6 +20,7 @@ type Client struct {
 	httpClient              *http.Client
 	serviceRegistryIndexURL string
 	registries              map[RegistryType]*Registry
+	mu                      sync.Mutex
 }
 
 func NewBootstrapClient(httpClient *http.Client, serviceRegistryIndexURL string) *Client {
@@ -30,6 +32,9 @@ func NewBootstrapClient(httpClient *http.Client, serviceRegistryIndexURL string)
 }
 
 func (c *Client) FetchAllRegistries(ctx context.Context) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	registryTypes := []RegistryType{DNS, IPv4, IPv6, ASN}
 	for _, regType := range registryTypes {
 		req, err := http.NewRequestWithContext(ctx, "GET", regType.ServiceRegistryIndexURL(c.serviceRegistryIndexURL), nil)
@@ -64,11 +69,15 @@ func (c *Client) FetchAllRegistries(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) FetchRegistryByType(ctx context.Context, regType RegistryType, forceUpdate bool) (*Registry, error) {
-	if c.registries[regType] != nil && !forceUpdate {
-		return c.registries[regType], nil
-	}
+func (c *Client) FetchRegistryByType(ctx context.Context, regType RegistryType) (*Registry, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	var registry Registry
+
+	if cached := c.registries[regType]; cached != nil {
+		return cached, nil
+	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", regType.ServiceRegistryIndexURL(c.serviceRegistryIndexURL), nil)
 	if err != nil {
@@ -100,50 +109,41 @@ func (c *Client) FetchRegistryByType(ctx context.Context, regType RegistryType, 
 }
 
 func (c *Client) GetDomainRDAPServers(ctx context.Context, domain string) ([]*url.URL, error) {
-	var err error
-	if c.registries[DNS] == nil {
-		c.registries[DNS], err = c.FetchRegistryByType(ctx, DNS, true)
-		if err != nil {
-			return nil, fmt.Errorf("failed to fetch DNS service registry: %w", err)
-		}
+	reg, err := c.FetchRegistryByType(ctx, DNS)
+	if err != nil {
+		return nil, err
 	}
-	return c.registries[DNS].getDNSServers(domain)
+
+	return reg.getDNSServers(domain)
 }
 
 func (c *Client) GetAutnumRDAPServers(ctx context.Context, asn string) ([]*url.URL, error) {
-	var err error
-	if c.registries[ASN] == nil {
-		c.registries[ASN], err = c.FetchRegistryByType(ctx, ASN, true)
-		if err != nil {
-			return nil, fmt.Errorf("failed to fetch ASN service registry: %w", err)
-		}
+	reg, err := c.FetchRegistryByType(ctx, ASN)
+	if err != nil {
+		return nil, err
 	}
-	return c.registries[ASN].getASNServers(asn)
+	return reg.getASNServers(asn)
 }
 
 func (c *Client) GetIPAddressRDAPServers(ctx context.Context, ip string) ([]*url.URL, error) {
-	var err error
 	ipAddress := net.ParseIP(ip)
 	if ipAddress == nil {
 		return nil, fmt.Errorf("input %s is not an IP Address", ip)
 	}
+
 	// IPv4 address
 	if ipAddress.To4() != nil {
-		if c.registries[IPv4] == nil {
-			c.registries[IPv4], err = c.FetchRegistryByType(ctx, IPv4, true)
-			if err != nil {
-				return nil, fmt.Errorf("failed to fetch IPv4 service registry: %w", err)
-			}
+		reg, err := c.FetchRegistryByType(ctx, IPv4)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch IPv4 service registry: %w", err)
 		}
-		return c.registries[IPv4].getNetServers(ipAddress)
+		return reg.getNetServers(ipAddress)
 	} else { // IPv6 address
-		if c.registries[IPv6] == nil {
-			c.registries[IPv6], err = c.FetchRegistryByType(ctx, IPv6, true)
-			if err != nil {
-				return nil, fmt.Errorf("failed to fetch IPv6 service registry: %w", err)
-			}
+		reg, err := c.FetchRegistryByType(ctx, IPv6)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch IPv6 service registry: %w", err)
 		}
-		return c.registries[IPv6].getNetServers(ipAddress)
+		return reg.getNetServers(ipAddress)
 	}
 
 }
