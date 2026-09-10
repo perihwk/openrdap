@@ -1,5 +1,7 @@
 package openrdap
 
+import "slices"
+
 // Domain represents information about a DNS name and point of delegation.
 //
 // Domain is a topmost RDAP response object.
@@ -96,16 +98,13 @@ func (d *Domain) GetEventByName(name string) *Event {
 
 func (d *Domain) GetEntityFromRole(role string) *Entity {
 	for _, entity := range d.Entities {
-		for _, entityRole := range entity.Roles {
-			if entityRole == role {
-				return &entity
-			}
+		if slices.Contains(entity.Roles, role) {
+			return &entity
 		}
+
 		for _, nestedEntity := range entity.Entities {
-			for _, nestedEntityRole := range nestedEntity.Roles {
-				if nestedEntityRole == role {
-					return &nestedEntity
-				}
+			if slices.Contains(nestedEntity.Roles, role) {
+				return &nestedEntity
 			}
 		}
 	}
