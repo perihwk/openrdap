@@ -68,17 +68,17 @@ func (c *Client) GetRDAPInfoFromServer(ctx context.Context, rdapServer, query st
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		fmt.Printf("server %s returned non-200 status code: %s", rdapServer, resp.Status)
+		return nil, fmt.Errorf("server %s returned non-200 status code: %s", rdapServer, resp.Status)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Printf("err: %v\n", err)
+		return nil, err
 	}
 
 	var result interface{}
@@ -138,6 +138,8 @@ func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain,
 			if err = json.Unmarshal(body, &domainResp); err != nil {
 				return nil, fmt.Errorf("error parsing RDAP response: %w", err)
 			}
+
+			break
 		}
 	}
 	return domainResp, nil
