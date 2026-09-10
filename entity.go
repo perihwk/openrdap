@@ -45,8 +45,10 @@ func (e *Entity) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("failed to unmarshal entity: %w", err)
 	}
 
-	// Process the rawVCard data into the structured VCard type
-	var err error
+	if aux.RawVCard == nil {
+		return nil
+	}
+
 	parsedJCard, err := parseJCard(aux.RawVCard)
 	if err != nil {
 		return err
@@ -54,5 +56,13 @@ func (e *Entity) UnmarshalJSON(data []byte) error {
 
 	e.VCards = append(e.VCards, parsedJCard)
 
+	return nil
+}
+
+// FirstVCard returns the entity's first vCard, or nil if it has none.
+func (e *Entity) FirstVCard() *VCard {
+	if len(e.VCards) > 0 {
+		return &e.VCards[0]
+	}
 	return nil
 }

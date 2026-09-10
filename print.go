@@ -21,14 +21,18 @@ func PrintDomainRDAP(domain *Domain) {
 
 	registrar := domain.GetEntityFromRole("registrar")
 	if registrar != nil {
-		fmt.Printf("Registrar: %s\n", registrar.VCards[0].FullName)
+		if vc := registrar.FirstVCard(); vc != nil {
+			fmt.Printf("Registrar: %s\n", vc.FullName)
+		}
 		fmt.Printf("RegistrarIanaID: %s\n", registrar.Handle)
 	}
 
 	abuse := domain.GetEntityFromRole("abuse")
 	if abuse != nil {
-		fmt.Printf("RegistrarAbuseContactEmail: %s\n", abuse.VCards[0].Email)
-		fmt.Printf("RegistrarAbuseContactPhone: %s\n", abuse.VCards[0].Telephone)
+		if vc := abuse.FirstVCard(); vc != nil {
+			fmt.Printf("RegistrarAbuseContactEmail: %s\n", vc.Email)
+			fmt.Printf("RegistrarAbuseContactPhone: %s\n", vc.Telephone)
+		}
 	}
 
 	registrarURL := domain.GetRegistrarURL()
@@ -38,26 +42,32 @@ func PrintDomainRDAP(domain *Domain) {
 
 	registrantEntity := domain.GetEntityFromRole("registrant")
 	if registrantEntity != nil {
-		fmt.Printf("RegistrantOrganization: %s\n", registrantEntity.VCards[0].Org)
-		fmt.Printf("RegistrantState: %+v\n", registrantEntity.VCards[0].Address)
-		fmt.Printf("RegistrantCountry: %+v\n", registrantEntity.VCards[0].Address)
-		fmt.Printf("RegistrantEmail: %s\n", registrantEntity.VCards[0].Email)
+		if vc := registrantEntity.FirstVCard(); vc != nil {
+			fmt.Printf("RegistrantOrganization: %s\n", vc.Org)
+			fmt.Printf("RegistrantState: %+v\n", vc.Address)
+			fmt.Printf("RegistrantCountry: %+v\n", vc.Address)
+			fmt.Printf("RegistrantEmail: %s\n", vc.Email)
+		}
 	}
 
 	adminEntity := domain.GetEntityFromRole("administrative")
 	if adminEntity != nil {
-		fmt.Printf("AdminOrganization: %v\n", adminEntity.VCards[0].Org)
-		fmt.Printf("AdminState: %v\n", adminEntity.VCards[0].Address.Region)
-		fmt.Printf("AdminCountry: %v\n", adminEntity.VCards[0].Address.Country)
-		fmt.Printf("AdminEmail: %v\n", adminEntity.VCards[0].Email)
+		if vc := adminEntity.FirstVCard(); vc != nil {
+			fmt.Printf("AdminOrganization: %v\n", vc.Org)
+			fmt.Printf("AdminState: %v\n", vc.Address.Region)
+			fmt.Printf("AdminCountry: %v\n", vc.Address.Country)
+			fmt.Printf("AdminEmail: %v\n", vc.Email)
+		}
 	}
 
 	techEntity := domain.GetEntityFromRole("technical")
 	if techEntity != nil {
-		fmt.Printf("TechOrganization: %v\n", techEntity.VCards[0].Org)
-		fmt.Printf("TechState: %v\n", techEntity.VCards[0].Address.Region)
-		fmt.Printf("TechCountry: %v\n", techEntity.VCards[0].Address.Country)
-		fmt.Printf("TechEmail: %v\n", techEntity.VCards[0].Email)
+		if vc := techEntity.FirstVCard(); vc != nil {
+			fmt.Printf("TechOrganization: %v\n", vc.Org)
+			fmt.Printf("TechState: %v\n", vc.Address.Region)
+			fmt.Printf("TechCountry: %v\n", vc.Address.Country)
+			fmt.Printf("TechEmail: %v\n", vc.Email)
+		}
 	}
 }
 
