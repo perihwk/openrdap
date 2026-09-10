@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"time"
@@ -48,13 +49,13 @@ func main() {
 	case bootstrap.DNS:
 		domain, err := rdapClient.GetRDAPFromDomain(ctx, *query)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		openrdap.PrintDomainRDAP(domain)
 	case bootstrap.ASN:
 		autnum, err := rdapClient.GetRDAPFromAutnum(ctx, *query)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		openrdap.PrintAutnumRDAP(autnum)
 	}

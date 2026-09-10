@@ -179,6 +179,7 @@ func (c *Client) GetRDAPFromIP(ctx context.Context, ip string) (*IPNetwork, erro
 			if err = json.Unmarshal(body, &ipAddressResp); err != nil {
 				return nil, fmt.Errorf("error parsing RDAP response: %w", err)
 			}
+			break
 		}
 	}
 	return ipAddressResp, nil
@@ -220,6 +221,7 @@ func (c *Client) GetRDAPFromAutnum(ctx context.Context, asn string) (*Autnum, er
 			if err = json.Unmarshal(body, &autnumResp); err != nil {
 				return nil, fmt.Errorf("error parsing RDAP response: %w", err)
 			}
+			break
 		}
 	}
 	return autnumResp, nil
