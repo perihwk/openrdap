@@ -12,34 +12,6 @@ import (
 	"github.com/perihwk/openrdap/bootstrap"
 )
 
-// A RegistrySearch represents a registry search type.
-type RegistrySearchType int
-
-const (
-	DNS RegistrySearchType = iota
-	IPv4
-	IPv6
-	ASN
-	ENTITY
-)
-
-func (r RegistrySearchType) Path() string {
-	switch r {
-	case DNS:
-		return "domain/%s"
-	case IPv4:
-		return "ip/%s"
-	case IPv6:
-		return "ip/%s"
-	case ASN:
-		return "autnum/%s"
-	case ENTITY:
-		return "entity/%s"
-	default:
-		panic("Unknown RegistrySearchType")
-	}
-}
-
 type Client struct {
 	httpClient      *http.Client
 	bootstrapClient *bootstrap.Client
@@ -60,58 +32,13 @@ func NewClient(
 	}
 }
 
-func (c *Client) GetRDAPInfoFromServer(ctx context.Context, rdapServer, query string, searchType RegistrySearchType) (any, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", rdapServer+fmt.Sprintf(searchType.Path(), query), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("server %s returned non-200 status code: %s", rdapServer, resp.Status)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var result interface{}
-	switch searchType {
-	case DNS:
-		result = &Domain{}
-	case IPv4, IPv6:
-		result = &IPNetwork{}
-	case ASN:
-		result = &Autnum{}
-	default:
-		return nil, fmt.Errorf("unsupported search type")
-	}
-
-	if err = json.Unmarshal(body, result); err != nil {
-		return nil, fmt.Errorf("error parsing RDAP response: %w", err)
-	}
-
-	return result, nil
-}
-
-func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain, error) {
-	registryServers, err := c.bootstrapClient.GetDomainRDAPServers(ctx, domain)
-	if err != nil {
-		return nil, err
-	}
-
-	var domainResp *Domain
+func (c *Client) doRequest(ctx context.Context, query string, regType bootstrap.RegistryType, registryServers []*url.URL) ([]byte, error) {
 	for i, u := range registryServers {
 		localSrv := u.String()
 		// use first https RDAP server. If no https server then use whatever the last option was
 		if u.Scheme == "https" || i == len(registryServers)-1 {
-			if localSrv, err = url.JoinPath(localSrv, "domain", domain); err != nil {
+			localSrv, err := url.JoinPath(localSrv, regType.PathSegment(), query)
+			if err != nil {
 				return nil, err
 			}
 
@@ -135,12 +62,67 @@ func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain,
 				return nil, fmt.Errorf("error reading RDAP response: %w", err)
 			}
 
-			if err = json.Unmarshal(body, &domainResp); err != nil {
-				return nil, fmt.Errorf("error parsing RDAP response: %w", err)
-			}
-
-			break
+			return body, nil
 		}
+	}
+
+	return nil, fmt.Errorf("no RDAP servers available")
+}
+
+func (c *Client) GetRDAPInfoFromServer(ctx context.Context, rdapServer, query string, searchType bootstrap.RegistryType) (any, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", rdapServer+fmt.Sprintf(searchType.Path(), query), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("server %s returned non-200 status code: %s", rdapServer, resp.Status)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result any
+	switch searchType {
+	case bootstrap.DNS:
+		result = &Domain{}
+	case bootstrap.IPv4, bootstrap.IPv6:
+		result = &IPNetwork{}
+	case bootstrap.ASN:
+		result = &Autnum{}
+	default:
+		return nil, fmt.Errorf("unsupported search type")
+	}
+
+	if err = json.Unmarshal(body, result); err != nil {
+		return nil, fmt.Errorf("error parsing RDAP response: %w", err)
+	}
+
+	return result, nil
+}
+
+func (c *Client) GetRDAPFromDomain(ctx context.Context, domain string) (*Domain, error) {
+	registryServers, err := c.bootstrapClient.GetDomainRDAPServers(ctx, domain)
+	if err != nil {
+		return nil, err
+	}
+
+	var domainResp *Domain
+	body, err := c.doRequest(ctx, domain, bootstrap.DNS, registryServers)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = json.Unmarshal(body, &domainResp); err != nil {
+		return nil, fmt.Errorf("error parsing RDAP response: %w", err)
 	}
 	return domainResp, nil
 }
@@ -152,35 +134,13 @@ func (c *Client) GetRDAPFromIP(ctx context.Context, ip string) (*IPNetwork, erro
 	}
 
 	var ipAddressResp *IPNetwork
-	for i, u := range registryServers {
-		// use first https RDAP server. If no https server then use whatever the last option was
-		if u.Scheme == "https" || i == len(registryServers)-1 {
-			if u.Path, err = url.JoinPath(u.Path, "ip", ip); err != nil {
-				return nil, err
-			}
-			req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
-			if err != nil {
-				return nil, err
-			}
+	body, err := c.doRequest(ctx, ip, bootstrap.IPv4, registryServers)
+	if err != nil {
+		return nil, err
+	}
 
-			resp, err := c.httpClient.Do(req)
-			if err != nil {
-				return nil, err
-			}
-
-			if resp.StatusCode != 200 {
-				return nil, fmt.Errorf("server %s returned non-200 status code: %s", u.Path, resp.Status)
-			}
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return nil, fmt.Errorf("error reading RDAP response: %w", err)
-			}
-
-			if err = json.Unmarshal(body, &ipAddressResp); err != nil {
-				return nil, fmt.Errorf("error parsing RDAP response: %w", err)
-			}
-			break
-		}
+	if err = json.Unmarshal(body, &ipAddressResp); err != nil {
+		return nil, fmt.Errorf("error parsing RDAP response: %w", err)
 	}
 	return ipAddressResp, nil
 }
@@ -192,37 +152,15 @@ func (c *Client) GetRDAPFromAutnum(ctx context.Context, asn string) (*Autnum, er
 	}
 
 	asn = strings.TrimPrefix(strings.ToUpper(asn), "AS")
+
 	var autnumResp *Autnum
-	for i, u := range registryServers {
-		// use first https RDAP server. If no https server then use whatever the last option was
-		if u.Scheme == "https" || i == len(registryServers)-1 {
-			if u.Path, err = url.JoinPath(u.Path, "autnum", asn); err != nil {
-				return nil, err
-			}
+	body, err := c.doRequest(ctx, asn, bootstrap.ASN, registryServers)
+	if err != nil {
+		return nil, err
+	}
 
-			req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
-			if err != nil {
-				return nil, err
-			}
-
-			resp, err := c.httpClient.Do(req)
-			if err != nil {
-				return nil, err
-			}
-
-			if resp.StatusCode != 200 {
-				return nil, fmt.Errorf("server %s returned non-200 status code: %s", u.Path, resp.Status)
-			}
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return nil, fmt.Errorf("error reading RDAP response: %w", err)
-			}
-
-			if err = json.Unmarshal(body, &autnumResp); err != nil {
-				return nil, fmt.Errorf("error parsing RDAP response: %w", err)
-			}
-			break
-		}
+	if err = json.Unmarshal(body, &autnumResp); err != nil {
+		return nil, fmt.Errorf("error parsing RDAP response: %w", err)
 	}
 	return autnumResp, nil
 }

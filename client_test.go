@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/perihwk/openrdap/bootstrap"
 )
 
 func TestGetRDAPInfoFromServer(t *testing.T) {
@@ -27,7 +29,7 @@ func TestGetRDAPInfoFromServer(t *testing.T) {
 
 	ctx := context.Background()
 	query := "perihwk.com"
-	searchType := DNS
+	searchType := bootstrap.DNS
 
 	rdapInfo, err := client.GetRDAPInfoFromServer(ctx, mockServer.URL+"/", query, searchType)
 	if err != nil {
@@ -64,7 +66,7 @@ func TestGetRDAPFromDomain(t *testing.T) {
 
 	ctx := context.Background()
 	query := "perihwk.com"
-	searchType := DNS
+	searchType := bootstrap.DNS
 
 	rdapInfo, err := client.GetRDAPInfoFromServer(ctx, mockServer.URL+"/", query, searchType)
 	if err != nil {
@@ -101,7 +103,7 @@ func TestGetRDAPFromIP(t *testing.T) {
 
 	ctx := context.Background()
 	query := "8.8.8.8"
-	searchType := IPv4
+	searchType := bootstrap.IPv4
 
 	rdapInfo, err := client.GetRDAPInfoFromServer(ctx, mockServer.URL+"/", query, searchType)
 	if err != nil {
@@ -138,7 +140,7 @@ func TestGetRDAPFromAutnum(t *testing.T) {
 
 	ctx := context.Background()
 	query := "23552"
-	searchType := ASN
+	searchType := bootstrap.ASN
 
 	rdapInfo, err := client.GetRDAPInfoFromServer(ctx, mockServer.URL+"/", query, searchType)
 	if err != nil {
