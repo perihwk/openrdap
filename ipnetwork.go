@@ -3,7 +3,7 @@ package openrdap
 // IPNetwork represents information of an IP Network.
 //
 // IPNetwork is a topmost RDAP response object.
-// https://datatracker.ietf.org/doc/html/rfc7483#section-5.4
+// https://datatracker.ietf.org/doc/html/rfc9083#section-5.4
 type IPNetwork struct {
 	Common
 	Conformance     []string `json:"rdapConformance"`

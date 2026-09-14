@@ -3,7 +3,7 @@ package openrdap
 // Autnum represents information of Autonomous System registrations.
 //
 // Autnum is a topmost RDAP response object.
-// https://datatracker.ietf.org/doc/html/rfc7483#section-5.5
+// https://datatracker.ietf.org/doc/html/rfc9083#section-5.5
 type Autnum struct {
 	Common
 	Conformance     []string `json:"rdapConformance"`

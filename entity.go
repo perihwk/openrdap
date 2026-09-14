@@ -8,7 +8,7 @@ import (
 // Entity represents information of an organisation or person.
 //
 // Entity is a topmost RDAP response object.
-// https://datatracker.ietf.org/doc/html/rfc7483#section-5.1
+// https://datatracker.ietf.org/doc/html/rfc9083#section-5.1
 type Entity struct {
 	Common
 	Conformance     []string `json:"rdapConformance"`

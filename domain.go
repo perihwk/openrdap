@@ -5,7 +5,7 @@ import "slices"
 // Domain represents information about a DNS name and point of delegation.
 //
 // Domain is a topmost RDAP response object.
-// https://tools.ietf.org/html/rfc7483
+// https://datatracker.ietf.org/doc/html/rfc9083
 type Domain struct {
 	Common
 	Conformance     []string `json:"rdapConformance"`
@@ -28,7 +28,7 @@ type Domain struct {
 	// Embedded (no separate type):
 	// Status []string
 	//
-	// https://tools.ietf.org/html/rfc7483#section-4.6
+	// https://datatracker.ietf.org/doc/html/rfc9083#section-4.6
 	Status []string `json:"status"`
 
 	PublicIDs []PublicID `json:"publicIds"`
@@ -88,12 +88,15 @@ type KeyData struct {
 }
 
 func (d *Domain) GetEventByName(name string) *Event {
-	for _, event := range d.Events {
-		if event.Action == name {
-			return &event
-		}
+	i := slices.IndexFunc(d.Events, func(e Event) bool {
+		return e.Action == name
+	})
+
+	if i < 0 {
+		return nil
 	}
-	return nil
+
+	return &d.Events[i]
 }
 
 func (d *Domain) GetEntityFromRole(role string) *Entity {
@@ -112,12 +115,15 @@ func (d *Domain) GetEntityFromRole(role string) *Entity {
 }
 
 func (d *Domain) GetRegistrarURL() string {
-	for _, link := range d.Links {
-		if link.Rel == "self" {
-			return link.Value
-		}
+	i := slices.IndexFunc(d.Links, func(l Link) bool {
+		return l.Rel == "self"
+	})
+
+	if i < 0 {
+		return ""
 	}
-	return ""
+
+	return d.Links[i].Value
 }
 
 func (d *Domain) GetNameServersDNS() []string {
