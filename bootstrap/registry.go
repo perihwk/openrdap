@@ -19,6 +19,7 @@ const (
 	IPv4
 	IPv6
 	ASN
+	ENTITY
 )
 
 func (r RegistryType) String() string {
@@ -31,8 +32,44 @@ func (r RegistryType) String() string {
 		return "ipv6"
 	case ASN:
 		return "asn"
+	case ENTITY:
+		return "entity"
 	default:
 		panic("Unknown RegistryType")
+	}
+}
+
+func (r RegistryType) Path() string {
+	switch r {
+	case DNS:
+		return "domain/%s"
+	case IPv4:
+		return "ip/%s"
+	case IPv6:
+		return "ip/%s"
+	case ASN:
+		return "autnum/%s"
+	case ENTITY:
+		return "entity/%s"
+	default:
+		panic("Unknown RegistrySearchType")
+	}
+}
+
+func (r RegistryType) PathSegment() string {
+	switch r {
+	case DNS:
+		return "domain"
+	case IPv4:
+		return "ip"
+	case IPv6:
+		return "ip"
+	case ASN:
+		return "autnum"
+	case ENTITY:
+		return "entity"
+	default:
+		panic("Unknown RegistrySearchType")
 	}
 }
 

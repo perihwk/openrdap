@@ -31,7 +31,8 @@ make build
 ## Example Usage
 ### Query a Domain
 
-```package main
+```
+package main
 
 import (
     "fmt"
@@ -51,4 +52,5 @@ func main() {
     }
 
     fmt.Printf("Domain Info: %+v\n", domain)
-}```
+}
+```
